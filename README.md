@@ -22,7 +22,7 @@ Check if npac-pdms-hemera-adapter is properly installed:
 
 ## Get Help
 
-To learn more about the tool visit the [homepage](http://tombenke.github.io/npac-pdms-hemera-adapter/).
+To learn more about the tool visit the [homepage](http://tombenke.github.io/npac-pdms-hemera-adapter/api/).
 
 ## References
 
