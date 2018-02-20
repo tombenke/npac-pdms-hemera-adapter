@@ -14,7 +14,7 @@ npac adapter with pdms api, using Hemera.js
 
 Run the install command:
 
-    npm install -g npac-pdms-hemera-adapter
+    npm install --save npac-pdms-hemera-adapter
 
 Check if npac-pdms-hemera-adapter is properly installed:
 
@@ -27,7 +27,6 @@ To learn more about the tool visit the [homepage](http://tombenke.github.io/npac
 ## References
 
 - [npac](http://tombenke.github.io/npac).
-- [npac-example-cli](http://tombenke.github.io/npac-example-cli).
 
 ---
 

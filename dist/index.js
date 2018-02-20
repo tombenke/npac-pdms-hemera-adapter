@@ -69,6 +69,18 @@ var mkHemeraLogger = function mkHemeraLogger(container) {
     }())();
 };
 
+/**
+ * The startup function of the pdmsHemera adapter
+ *
+ * This function should be registered with the startup phase, then npac will call when the project is starting.
+ *
+ * @arg {Object} container  - The actual state of the container this adapter will be added
+ * @arg {Function} next     - Error-first callback function to pass the result partial container extended with the pdmsHemera adapter.
+ *
+ * see also: the `npac.startup` process description.
+ *
+ * @function
+ */
 var startup = function startup(container, next) {
     // Merges the defaults with the config coming from the outer world
     var pdmsConfig = _lodash2.default.merge({}, _config2.default, { pdms: container.config.pdms || {} });
@@ -94,6 +106,18 @@ var startup = function startup(container, next) {
     });
 };
 
+/**
+ * The shutdown function of the pdmsHemera adapter
+ *
+ * This function should be registered with the shutdown phase, then npac will call when graceful shutdown happens.
+ *
+ * @arg {Object} container  - The actual state of the container this adapter is running
+ * @arg {Function} next     - Error-first callback function to pass the result partial container extended with the pdmsHemera adapter.
+ *
+ * see also: the `npac.startup` process description.
+ *
+ * @function
+ */
 var shutdown = function shutdown(container, next) {
     hemera.close();
     container.logger.info("Shut down pdmsHemera");

@@ -4,8 +4,6 @@ var _npac = require('npac');
 
 var _npac2 = _interopRequireDefault(_npac);
 
-var _chai = require('chai');
-
 var _config = require('./config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -50,3 +48,4 @@ describe('pdms', function () {
         });
     });
 });
+//import { expect } from 'chai'
