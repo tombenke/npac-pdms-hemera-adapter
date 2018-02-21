@@ -16,9 +16,19 @@ Run the install command:
 
     npm install --save npac-pdms-hemera-adapter
 
-Check if npac-pdms-hemera-adapter is properly installed:
+## Configuration
 
-    $ npac-pdms-hemera-adapter --help
+This module uses the `config.pdms` property to gain its configuration parameters.
+
+The default parameters can be found in [`src/config.js`](src/config.js):
+
+```JSON
+{
+    pdms: {
+        natsUri: process.env.PDMS_NATS_URI || "nats://demo.nats.io:4222"
+    }
+}
+```
 
 ## Get Help
 
