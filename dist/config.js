@@ -5,6 +5,6 @@
  */
 module.exports = {
     pdms: {
-        natsUri: process.env.EASER_NATS_URI || "nats://demo.nats.io:4222"
+        natsUri: process.env.PDMS_NATS_URI || "nats://demo.nats.io:4222"
     }
 };

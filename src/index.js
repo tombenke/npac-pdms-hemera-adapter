@@ -52,7 +52,10 @@ const startup = (container, next) => {
     const natsConnection = nats.connect({ url: pdmsConfig.pdms.natsUri })
     hemera = new Hemera(natsConnection, {
         logLevel: container.logger.level,
-        logger: mkHemeraLogger(container)
+        logger: mkHemeraLogger(container),
+        bloomrun: {
+            indexing: 'depth'
+        }
     })
 
     hemera.ready(() => {
