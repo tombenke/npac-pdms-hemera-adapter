@@ -89,7 +89,10 @@ var startup = function startup(container, next) {
     var natsConnection = _nats2.default.connect({ url: pdmsConfig.pdms.natsUri });
     hemera = new _natsHemera2.default(natsConnection, {
         logLevel: container.logger.level,
-        logger: mkHemeraLogger(container)
+        logger: mkHemeraLogger(container),
+        bloomrun: {
+            indexing: 'depth'
+        }
     });
 
     hemera.ready(function () {

@@ -1,3 +1,4 @@
+import sinon from 'sinon'
 import npac from 'npac'
 //import { expect } from 'chai'
 import defaults from './config'
@@ -5,10 +6,29 @@ import * as pdms from './index'
 import * as _ from 'lodash'
 
 describe('pdms', () => {
+    let sandbox
+
+    beforeEach(done => {
+        sandbox = sinon.sandbox.create({ useFakeTimers: false })
+        done()
+    })
+
+    afterEach(done => {
+        const signals = ['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGUSR1', 'SIGUSR2']
+        for(const signal in signals) {
+            process.removeAllListeners(signals[signal])
+        }
+        sandbox.restore()
+        done()
+    })
 
     const config = _.merge({}, defaults, { /* Add command specific config parameters */ })
 
-    it('#startup', (done) => {
+    it('#startup, #shutdown', (done) => {
+        sandbox.stub(process, 'exit').callsFake((signal) => {
+            done()
+        })
+
         const adapters = [
             npac.mergeConfig(config),
             npac.addLogger,
@@ -21,17 +41,15 @@ describe('pdms', () => {
             next(null, null)
         }
 
-        // TODO: Move shutdown into the shutdown list of npac, instead of using command
-        const shutdownPdms = (container, next) => {
-            container.logger.info(`Run job to stop pdms`)
-            pdms.shutdown(container, next)
-        }
+        const terminators = [
+            pdms.shutdown
+        ]
 
-        npac.start(adapters, [testPdms, shutdownPdms], (err, res) => {
+        npac.start(adapters, [testPdms], terminators, (err, res) => {
             if (err) {
                 throw(err)
             } else {
-                done()
+                process.kill(process.pid, 'SIGTERM')
             }
         })
     })

@@ -1,5 +1,9 @@
 'use strict';
 
+var _sinon = require('sinon');
+
+var _sinon2 = _interopRequireDefault(_sinon);
+
 var _npac = require('npac');
 
 var _npac2 = _interopRequireDefault(_npac);
@@ -21,10 +25,29 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 describe('pdms', function () {
+    var sandbox = void 0;
+
+    beforeEach(function (done) {
+        sandbox = _sinon2.default.sandbox.create({ useFakeTimers: false });
+        done();
+    });
+
+    afterEach(function (done) {
+        var signals = ['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGUSR1', 'SIGUSR2'];
+        for (var signal in signals) {
+            process.removeAllListeners(signals[signal]);
+        }
+        sandbox.restore();
+        done();
+    });
 
     var config = _.merge({}, _config2.default, {/* Add command specific config parameters */});
 
-    it('#startup', function (done) {
+    it('#startup, #shutdown', function (done) {
+        sandbox.stub(process, 'exit').callsFake(function (signal) {
+            done();
+        });
+
         var adapters = [_npac2.default.mergeConfig(config), _npac2.default.addLogger, pdms.startup];
 
         var testPdms = function testPdms(container, next) {
@@ -33,17 +56,13 @@ describe('pdms', function () {
             next(null, null);
         };
 
-        // TODO: Move shutdown into the shutdown list of npac, instead of using command
-        var shutdownPdms = function shutdownPdms(container, next) {
-            container.logger.info('Run job to stop pdms');
-            pdms.shutdown(container, next);
-        };
+        var terminators = [pdms.shutdown];
 
-        _npac2.default.start(adapters, [testPdms, shutdownPdms], function (err, res) {
+        _npac2.default.start(adapters, [testPdms], terminators, function (err, res) {
             if (err) {
                 throw err;
             } else {
-                done();
+                process.kill(process.pid, 'SIGTERM');
             }
         });
     });
