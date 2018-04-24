@@ -23,10 +23,10 @@
   "bin": {},
   "main": "./dist/index.js",
   "dependencies": {
-    "nats": "^0.7.29",
-    "nats-hemera": "^3.1.8",
     "datafile": "3.2.0",
     "lodash": "4.17.4",
+    "nats": "^0.8.4",
+    "nats-hemera": "^5.4.0",
     "npac": "^2.0.2",
     "yargs": "10.0.3"
   },
