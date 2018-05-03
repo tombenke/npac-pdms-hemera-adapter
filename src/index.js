@@ -7,7 +7,7 @@ import nats from 'nats'
 import defaults from './config'
 import _ from 'lodash'
 
-let hemera = null
+//let hemera = null
 
 const mkHemeraLogger = (container) => {
     return new class Logger {
@@ -50,7 +50,7 @@ const startup = (container, next) => {
     container.logger.info(`Start up pdmsHemera`)
 
     const natsConnection = nats.connect({ url: pdmsConfig.pdms.natsUri })
-    hemera = new Hemera(natsConnection, {
+    const hemera = new Hemera(natsConnection, {
         logLevel: container.logger.level,
         logger: mkHemeraLogger(container),
         bloomrun: {
@@ -65,6 +65,7 @@ const startup = (container, next) => {
         next(null, {
             config: pdmsConfig,
             pdms: {
+                hemera: hemera,
                 add: hemera.add.bind(hemera),
                 act: hemera.act.bind(hemera)
             }
@@ -85,7 +86,7 @@ const startup = (container, next) => {
  * @function
  */
 const shutdown = (container, next) => {
-    hemera.close()
+    container.pdms.hemera.close()
     container.logger.info("Shut down pdmsHemera")
     next(null, null)
 }

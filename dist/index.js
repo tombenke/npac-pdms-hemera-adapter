@@ -25,7 +25,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var hemera = null;
+//let hemera = null
 
 var mkHemeraLogger = function mkHemeraLogger(container) {
     return new (function () {
@@ -87,7 +87,7 @@ var startup = function startup(container, next) {
     container.logger.info('Start up pdmsHemera');
 
     var natsConnection = _nats2.default.connect({ url: pdmsConfig.pdms.natsUri });
-    hemera = new _natsHemera2.default(natsConnection, {
+    var hemera = new _natsHemera2.default(natsConnection, {
         logLevel: container.logger.level,
         logger: mkHemeraLogger(container),
         bloomrun: {
@@ -102,6 +102,7 @@ var startup = function startup(container, next) {
         next(null, {
             config: pdmsConfig,
             pdms: {
+                hemera: hemera,
                 add: hemera.add.bind(hemera),
                 act: hemera.act.bind(hemera)
             }
@@ -122,7 +123,7 @@ var startup = function startup(container, next) {
  * @function
  */
 var shutdown = function shutdown(container, next) {
-    hemera.close();
+    container.pdms.hemera.close();
     container.logger.info("Shut down pdmsHemera");
     next(null, null);
 };

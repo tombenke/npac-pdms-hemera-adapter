@@ -80,7 +80,9 @@ describe('pdms', () => {
         }
 
         const adapters = [
-            npac.mergeConfig(config),
+            npac.mergeConfig(_.merge({}, config, {
+                pdms: { natsUri: 'nats://localhost:4222' }
+            })),
             npac.addLogger,
             pdms.startup,
             monitoringAdapter
