@@ -92,7 +92,8 @@ var startup = function startup(container, next) {
         logger: mkHemeraLogger(container),
         bloomrun: {
             indexing: 'depth'
-        }
+        },
+        timeout: pdmsConfig.pdms.timeout
     });
 
     hemera.ready(function () {
