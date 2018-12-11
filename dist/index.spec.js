@@ -93,7 +93,7 @@ describe('pdms', function () {
         };
 
         var adapters = [_npac2.default.mergeConfig(_.merge({}, config, {
-            pdms: { natsUri: 'nats://localhost:4222' }
+            pdms: { natsUri: 'nats://demo.nats.io:4222' }
         })), _npac2.default.addLogger, pdms.startup, monitoringAdapter];
 
         var testPdms = function testPdms(container, next) {
