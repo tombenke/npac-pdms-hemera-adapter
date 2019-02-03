@@ -16,11 +16,10 @@ after(function (done) {
 });
 
 describe('pmdsHemera.config', function () {
-
     it('#defaults', function (done) {
         var expected = {
             pdms: {
-                natsUri: "nats://demo.nats.io:4222",
+                natsUri: 'nats://demo.nats.io:4222',
                 timeout: 2000
             }
         };

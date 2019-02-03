@@ -41,7 +41,9 @@ describe('pdms', function () {
         done();
     });
 
-    var config = _.merge({}, _config2.default, {/* Add command specific config parameters */});
+    var config = _.merge({}, _config2.default, {
+        /* Add command specific config parameters */
+    });
 
     it('#startup, #shutdown', function (done) {
         sandbox.stub(process, 'exit').callsFake(function (signal) {
@@ -75,17 +77,17 @@ describe('pdms', function () {
         var getMonitoringIsAlive = function getMonitoringIsAlive(req, cb) {
             cb(null, {
                 headers: {
-                    "Content-Type": "application/json; charset=utf-8"
+                    'Content-Type': 'application/json; charset=utf-8'
                 },
                 body: {
-                    status: "OK"
+                    status: 'OK'
                 }
             });
         };
 
         var monitoringAdapter = function monitoringAdapter(container, next) {
             // Add built-in monitoring service
-            container.pdms.add({ topic: "/monitoring/isAlive", method: "get", uri: "/monitoring/isAlive" }, function (data, cb) {
+            container.pdms.add({ topic: '/monitoring/isAlive', method: 'get', uri: '/monitoring/isAlive' }, function (data, cb) {
                 container.logger.info('Monitoring handler called with ' + JSON.stringify(data.request, null, '') + ', ' + data.method + ', ' + data.uri + ', ...');
                 getMonitoringIsAlive(data.request, cb);
             });
@@ -99,9 +101,9 @@ describe('pdms', function () {
         var testPdms = function testPdms(container, next) {
             container.logger.info('Run job to test pdms');
             container.pdms.act({
-                topic: "/monitoring/isAlive",
-                method: "get",
-                uri: "/monitoring/isAlive",
+                topic: '/monitoring/isAlive',
+                method: 'get',
+                uri: '/monitoring/isAlive',
                 request: {
                     parameters: {},
                     body: {}
@@ -132,10 +134,10 @@ describe('pdms', function () {
             setTimeout(function () {
                 cb(null, {
                     headers: {
-                        "Content-Type": "application/json; charset=utf-8"
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: {
-                        status: "OK"
+                        status: 'OK'
                     }
                 });
             }, 3000);
@@ -143,7 +145,7 @@ describe('pdms', function () {
 
         var longRunningTaskAdapter = function longRunningTaskAdapter(container, next) {
             // Add built-in monitoring service
-            container.pdms.add({ topic: "/long/running/task", method: "get", uri: "/long/running/task" }, function (data, cb) {
+            container.pdms.add({ topic: '/long/running/task', method: 'get', uri: '/long/running/task' }, function (data, cb) {
                 container.logger.info('Monitoring handler called with ' + JSON.stringify(data.request, null, '') + ', ' + data.method + ', ' + data.uri + ', ...');
                 longRunningTask(data.request, cb);
             });
@@ -155,9 +157,9 @@ describe('pdms', function () {
         var testPdms = function testPdms(container, next) {
             container.logger.info('Run job to test pdms');
             container.pdms.act({
-                topic: "/long/running/task",
-                method: "get",
-                uri: "/long/running/task",
+                topic: '/long/running/task',
+                method: 'get',
+                uri: '/long/running/task',
                 request: {
                     parameters: {},
                     body: {}
@@ -177,6 +179,6 @@ describe('pdms', function () {
                 process.kill(process.pid, 'SIGTERM');
             }
         });
-    }).timeout(5000);
+    }).timeout(15000);
 });
 //import { expect } from 'chai'

@@ -125,7 +125,7 @@ var startup = function startup(container, next) {
  */
 var shutdown = function shutdown(container, next) {
     container.pdms.hemera.close();
-    container.logger.info("Shut down pdmsHemera");
+    container.logger.info('Shut down pdmsHemera');
     next(null, null);
 };
 
