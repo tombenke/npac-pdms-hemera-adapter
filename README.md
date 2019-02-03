@@ -1,7 +1,7 @@
 npac-pdms-hemera-adapter
 ========================
 
-[![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
+[![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
 [![npm version][npm-badge]][npm-url]
 [![Build Status][travis-badge]][travis-url]
 [![Coveralls][BadgeCoveralls]][Coveralls]
@@ -22,7 +22,7 @@ This module uses the `config.pdms` property to gain its configuration parameters
 
 The default parameters can be found in [`src/config.js`](src/config.js):
 
-```JSON
+```JavaScript
 {
     pdms: {
         natsUri: process.env.PDMS_NATS_URI || "nats://demo.nats.io:4222"
