@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*jshint node: true */
-'use strict';
+'use strict'
 
 import Hemera from 'nats-hemera'
 import nats from 'nats'
@@ -9,27 +9,27 @@ import _ from 'lodash'
 
 //let hemera = null
 
-const mkHemeraLogger = (container) => {
+const mkHemeraLogger = container => {
     return new class Logger {
-        info (msg) {
+        info(msg) {
             container.logger.info(`hemera: ${JSON.stringify(msg, null, '')}`)
         }
-        warn (msg) {
+        warn(msg) {
             container.logger.warn(JSON.stringify(msg, null, ''))
         }
-        debug (msg) {
+        debug(msg) {
             //container.logger.debug(JSON.stringify(msg, null, ''))
         }
-        trace (msg) {
+        trace(msg) {
             container.logger.verbose(JSON.stringify(msg, null, ''))
         }
-        error (msg) {
+        error(msg) {
             container.logger.error(JSON.stringify(msg, null, ''))
         }
-        fatal (msg) {
+        fatal(msg) {
             container.logger.error(JSON.stringify(msg, null, ''))
         }
-    }
+    }()
 }
 
 /**
@@ -88,7 +88,7 @@ const startup = (container, next) => {
  */
 const shutdown = (container, next) => {
     container.pdms.hemera.close()
-    container.logger.info("Shut down pdmsHemera")
+    container.logger.info('Shut down pdmsHemera')
     next(null, null)
 }
 

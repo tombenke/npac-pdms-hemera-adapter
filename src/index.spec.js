@@ -15,25 +15,23 @@ describe('pdms', () => {
 
     afterEach(done => {
         const signals = ['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGUSR1', 'SIGUSR2']
-        for(const signal in signals) {
+        for (const signal in signals) {
             process.removeAllListeners(signals[signal])
         }
         sandbox.restore()
         done()
     })
 
-    const config = _.merge({}, defaults, { /* Add command specific config parameters */ })
+    const config = _.merge({}, defaults, {
+        /* Add command specific config parameters */
+    })
 
-    it('#startup, #shutdown', (done) => {
-        sandbox.stub(process, 'exit').callsFake((signal) => {
+    it('#startup, #shutdown', done => {
+        sandbox.stub(process, 'exit').callsFake(signal => {
             done()
         })
 
-        const adapters = [
-            npac.mergeConfig(config),
-            npac.addLogger,
-            pdms.startup
-        ]
+        const adapters = [npac.mergeConfig(config), npac.addLogger, pdms.startup]
 
         const testPdms = (container, next) => {
             container.logger.info(`Run job to test pdms`)
@@ -41,48 +39,55 @@ describe('pdms', () => {
             next(null, null)
         }
 
-        const terminators = [
-            pdms.shutdown
-        ]
+        const terminators = [pdms.shutdown]
 
         npac.start(adapters, [testPdms], terminators, (err, res) => {
             if (err) {
-                throw(err)
+                throw err
             } else {
                 process.kill(process.pid, 'SIGTERM')
             }
         })
     })
 
-    it('call pdms service', (done) => {
-        sandbox.stub(process, 'exit').callsFake((signal) => {
+    it('call pdms service', done => {
+        sandbox.stub(process, 'exit').callsFake(signal => {
             done()
         })
 
         const getMonitoringIsAlive = (req, cb) => {
             cb(null, {
                 headers: {
-                    "Content-Type": "application/json; charset=utf-8"
+                    'Content-Type': 'application/json; charset=utf-8'
                 },
                 body: {
-                    status: "OK"
+                    status: 'OK'
                 }
             })
         }
 
         const monitoringAdapter = (container, next) => {
             // Add built-in monitoring service
-            container.pdms.add({ topic: "/monitoring/isAlive", method: "get", uri: "/monitoring/isAlive" }, function (data, cb) {
-                container.logger.info(`Monitoring handler called with ${JSON.stringify(data.request, null, '')}, ${data.method}, ${data.uri}, ...`)
+            container.pdms.add({ topic: '/monitoring/isAlive', method: 'get', uri: '/monitoring/isAlive' }, function(
+                data,
+                cb
+            ) {
+                container.logger.info(
+                    `Monitoring handler called with ${JSON.stringify(data.request, null, '')}, ${data.method}, ${
+                        data.uri
+                    }, ...`
+                )
                 getMonitoringIsAlive(data.request, cb)
             })
             next(null, {})
         }
 
         const adapters = [
-            npac.mergeConfig(_.merge({}, config, {
-                pdms: { natsUri: 'nats://demo.nats.io:4222' }
-            })),
+            npac.mergeConfig(
+                _.merge({}, config, {
+                    pdms: { natsUri: 'nats://demo.nats.io:4222' }
+                })
+            ),
             npac.addLogger,
             pdms.startup,
             monitoringAdapter
@@ -90,36 +95,36 @@ describe('pdms', () => {
 
         const testPdms = (container, next) => {
             container.logger.info(`Run job to test pdms`)
-            container.pdms.act({
-                topic: "/monitoring/isAlive",
-                method: "get",
-                uri: "/monitoring/isAlive",
-                request: {
-                    parameters: {
-                    },
-                    body: {}
+            container.pdms.act(
+                {
+                    topic: '/monitoring/isAlive',
+                    method: 'get',
+                    uri: '/monitoring/isAlive',
+                    request: {
+                        parameters: {},
+                        body: {}
+                    }
+                },
+                (err, resp) => {
+                    container.logger.info(`RES ${JSON.stringify(resp, null, '')}`)
+                    next(err, resp)
                 }
-            }, (err, resp) => {
-                container.logger.info(`RES ${JSON.stringify(resp, null, '')}`)
-                next(err, resp)
-            })
+            )
         }
 
-        const terminators = [
-            pdms.shutdown
-        ]
+        const terminators = [pdms.shutdown]
 
         npac.start(adapters, [testPdms], terminators, (err, res) => {
             if (err) {
-                throw(err)
+                throw err
             } else {
                 process.kill(process.pid, 'SIGTERM')
             }
         })
     })
 
-    it('call pdms service - increased timeout', (done) => {
-        sandbox.stub(process, 'exit').callsFake((signal) => {
+    it('call pdms service - increased timeout', done => {
+        sandbox.stub(process, 'exit').callsFake(signal => {
             done()
         })
 
@@ -127,10 +132,10 @@ describe('pdms', () => {
             setTimeout(function() {
                 cb(null, {
                     headers: {
-                        "Content-Type": "application/json; charset=utf-8"
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: {
-                        status: "OK"
+                        status: 'OK'
                     }
                 })
             }, 3000)
@@ -138,8 +143,15 @@ describe('pdms', () => {
 
         const longRunningTaskAdapter = (container, next) => {
             // Add built-in monitoring service
-            container.pdms.add({ topic: "/long/running/task", method: "get", uri: "/long/running/task" }, function (data, cb) {
-                container.logger.info(`Monitoring handler called with ${JSON.stringify(data.request, null, '')}, ${data.method}, ${data.uri}, ...`)
+            container.pdms.add({ topic: '/long/running/task', method: 'get', uri: '/long/running/task' }, function(
+                data,
+                cb
+            ) {
+                container.logger.info(
+                    `Monitoring handler called with ${JSON.stringify(data.request, null, '')}, ${data.method}, ${
+                        data.uri
+                    }, ...`
+                )
                 longRunningTask(data.request, cb)
             })
             next(null, {})
@@ -154,28 +166,28 @@ describe('pdms', () => {
 
         const testPdms = (container, next) => {
             container.logger.info(`Run job to test pdms`)
-            container.pdms.act({
-                topic: "/long/running/task",
-                method: "get",
-                uri: "/long/running/task",
-                request: {
-                    parameters: {
-                    },
-                    body: {}
+            container.pdms.act(
+                {
+                    topic: '/long/running/task',
+                    method: 'get',
+                    uri: '/long/running/task',
+                    request: {
+                        parameters: {},
+                        body: {}
+                    }
+                },
+                (err, resp) => {
+                    container.logger.info(`RES ${JSON.stringify(resp, null, '')}`)
+                    next(err, resp)
                 }
-            }, (err, resp) => {
-                container.logger.info(`RES ${JSON.stringify(resp, null, '')}`)
-                next(err, resp)
-            })
+            )
         }
 
-        const terminators = [
-            pdms.shutdown
-        ]
+        const terminators = [pdms.shutdown]
 
         npac.start(adapters, [testPdms], terminators, (err, res) => {
             if (err) {
-                throw(err)
+                throw err
             } else {
                 process.kill(process.pid, 'SIGTERM')
             }
