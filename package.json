@@ -63,7 +63,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run prettier && lint-staged"
+      "pre-commit": "npm run prettier && lint-staged && npm run docs"
     }
   },
   "lint-staged": {
@@ -83,11 +83,10 @@
     "docgen": "node_modules/.bin/gulp docgen",
     "precommit": "lint-staged",
     "prettier": "prettier --single-quote --write 'src/**/*.{js,jsx,ts,tsx,json,css,scss,md}'",
-    "prepublishOnly": "npm run lint && npm run test && npm run build && npm run docs",
-    "all": "npm run lint && npm run coverage && npm run build && npm run docs"
+    "prepublishOnly": "npm run prettier && lint-staged && npm run test && npm run build && npm run docs",
+    "all": "npm run coverage && npm run build && npm run docs"
   },
   "pre-push": [
-    "lint",
     "test"
   ]
 }
