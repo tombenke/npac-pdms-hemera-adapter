@@ -1,7 +1,7 @@
 {
   "name": "npac-pdms-hemera-adapter",
   "description": "npac adapter with pdms api, using Hemera.js",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "keywords": [
     "cli",
     "util",
