@@ -1,6 +1,5 @@
 import sinon from 'sinon'
-import npac from 'npac'
-//import { expect } from 'chai'
+import { addLogger, mergeConfig, removeSignalHandlers, catchExitSignals, npacStart } from 'npac'
 import defaults from './config'
 import * as pdms from './index'
 import * as _ from 'lodash'
@@ -9,15 +8,13 @@ describe('pdms', () => {
     let sandbox
 
     beforeEach(done => {
+        removeSignalHandlers()
         sandbox = sinon.sandbox.create({ useFakeTimers: false })
         done()
     })
 
     afterEach(done => {
-        const signals = ['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGUSR1', 'SIGUSR2']
-        for (const signal in signals) {
-            process.removeAllListeners(signals[signal])
-        }
+        removeSignalHandlers()
         sandbox.restore()
         done()
     })
@@ -27,11 +24,9 @@ describe('pdms', () => {
     })
 
     it('#startup, #shutdown', done => {
-        sandbox.stub(process, 'exit').callsFake(signal => {
-            done()
-        })
+        catchExitSignals(sandbox, done)
 
-        const adapters = [npac.mergeConfig(config), npac.addLogger, pdms.startup]
+        const adapters = [mergeConfig(config), addLogger, pdms.startup]
 
         const testPdms = (container, next) => {
             container.logger.info(`Run job to test pdms`)
@@ -41,7 +36,7 @@ describe('pdms', () => {
 
         const terminators = [pdms.shutdown]
 
-        npac.start(adapters, [testPdms], terminators, (err, res) => {
+        npacStart(adapters, [testPdms], terminators, (err, res) => {
             if (err) {
                 throw err
             } else {
@@ -51,9 +46,7 @@ describe('pdms', () => {
     })
 
     it('call pdms service', done => {
-        sandbox.stub(process, 'exit').callsFake(signal => {
-            done()
-        })
+        catchExitSignals(sandbox, done)
 
         const getMonitoringIsAlive = (req, cb) => {
             cb(null, {
@@ -83,12 +76,12 @@ describe('pdms', () => {
         }
 
         const adapters = [
-            npac.mergeConfig(
+            mergeConfig(
                 _.merge({}, config, {
                     pdms: { natsUri: 'nats://demo.nats.io:4222' }
                 })
             ),
-            npac.addLogger,
+            addLogger,
             pdms.startup,
             monitoringAdapter
         ]
@@ -114,19 +107,11 @@ describe('pdms', () => {
 
         const terminators = [pdms.shutdown]
 
-        npac.start(adapters, [testPdms], terminators, (err, res) => {
-            if (err) {
-                throw err
-            } else {
-                process.kill(process.pid, 'SIGTERM')
-            }
-        })
+        npacStart(adapters, [testPdms], terminators)
     })
 
     it('call pdms service - increased timeout', done => {
-        sandbox.stub(process, 'exit').callsFake(signal => {
-            done()
-        })
+        catchExitSignals(sandbox, done)
 
         const longRunningTask = (req, cb) => {
             setTimeout(function() {
@@ -158,8 +143,8 @@ describe('pdms', () => {
         }
 
         const adapters = [
-            npac.mergeConfig(_.merge({}, config, { pdms: { timeout: 4000 } })),
-            npac.addLogger,
+            mergeConfig(_.merge({}, config, { pdms: { timeout: 4000 } })),
+            addLogger,
             pdms.startup,
             longRunningTaskAdapter
         ]
@@ -185,12 +170,6 @@ describe('pdms', () => {
 
         const terminators = [pdms.shutdown]
 
-        npac.start(adapters, [testPdms], terminators, (err, res) => {
-            if (err) {
-                throw err
-            } else {
-                process.kill(process.pid, 'SIGTERM')
-            }
-        })
+        npacStart(adapters, [testPdms], terminators)
     }).timeout(15000)
 })
