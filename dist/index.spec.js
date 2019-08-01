@@ -6,8 +6,6 @@ var _sinon2 = _interopRequireDefault(_sinon);
 
 var _npac = require('npac');
 
-var _npac2 = _interopRequireDefault(_npac);
-
 var _config = require('./config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -28,15 +26,13 @@ describe('pdms', function () {
     var sandbox = void 0;
 
     beforeEach(function (done) {
+        (0, _npac.removeSignalHandlers)();
         sandbox = _sinon2.default.sandbox.create({ useFakeTimers: false });
         done();
     });
 
     afterEach(function (done) {
-        var signals = ['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGUSR1', 'SIGUSR2'];
-        for (var signal in signals) {
-            process.removeAllListeners(signals[signal]);
-        }
+        (0, _npac.removeSignalHandlers)();
         sandbox.restore();
         done();
     });
@@ -46,11 +42,9 @@ describe('pdms', function () {
     });
 
     it('#startup, #shutdown', function (done) {
-        sandbox.stub(process, 'exit').callsFake(function (signal) {
-            done();
-        });
+        (0, _npac.catchExitSignals)(sandbox, done);
 
-        var adapters = [_npac2.default.mergeConfig(config), _npac2.default.addLogger, pdms.startup];
+        var adapters = [(0, _npac.mergeConfig)(config), _npac.addLogger, pdms.startup];
 
         var testPdms = function testPdms(container, next) {
             container.logger.info('Run job to test pdms');
@@ -60,7 +54,7 @@ describe('pdms', function () {
 
         var terminators = [pdms.shutdown];
 
-        _npac2.default.start(adapters, [testPdms], terminators, function (err, res) {
+        (0, _npac.npacStart)(adapters, [testPdms], terminators, function (err, res) {
             if (err) {
                 throw err;
             } else {
@@ -70,9 +64,7 @@ describe('pdms', function () {
     });
 
     it('call pdms service', function (done) {
-        sandbox.stub(process, 'exit').callsFake(function (signal) {
-            done();
-        });
+        (0, _npac.catchExitSignals)(sandbox, done);
 
         var getMonitoringIsAlive = function getMonitoringIsAlive(req, cb) {
             cb(null, {
@@ -94,9 +86,9 @@ describe('pdms', function () {
             next(null, {});
         };
 
-        var adapters = [_npac2.default.mergeConfig(_.merge({}, config, {
+        var adapters = [(0, _npac.mergeConfig)(_.merge({}, config, {
             pdms: { natsUri: 'nats://demo.nats.io:4222' }
-        })), _npac2.default.addLogger, pdms.startup, monitoringAdapter];
+        })), _npac.addLogger, pdms.startup, monitoringAdapter];
 
         var testPdms = function testPdms(container, next) {
             container.logger.info('Run job to test pdms');
@@ -116,19 +108,11 @@ describe('pdms', function () {
 
         var terminators = [pdms.shutdown];
 
-        _npac2.default.start(adapters, [testPdms], terminators, function (err, res) {
-            if (err) {
-                throw err;
-            } else {
-                process.kill(process.pid, 'SIGTERM');
-            }
-        });
+        (0, _npac.npacStart)(adapters, [testPdms], terminators);
     });
 
     it('call pdms service - increased timeout', function (done) {
-        sandbox.stub(process, 'exit').callsFake(function (signal) {
-            done();
-        });
+        (0, _npac.catchExitSignals)(sandbox, done);
 
         var longRunningTask = function longRunningTask(req, cb) {
             setTimeout(function () {
@@ -152,7 +136,7 @@ describe('pdms', function () {
             next(null, {});
         };
 
-        var adapters = [_npac2.default.mergeConfig(_.merge({}, config, { pdms: { timeout: 4000 } })), _npac2.default.addLogger, pdms.startup, longRunningTaskAdapter];
+        var adapters = [(0, _npac.mergeConfig)(_.merge({}, config, { pdms: { timeout: 4000 } })), _npac.addLogger, pdms.startup, longRunningTaskAdapter];
 
         var testPdms = function testPdms(container, next) {
             container.logger.info('Run job to test pdms');
@@ -172,13 +156,6 @@ describe('pdms', function () {
 
         var terminators = [pdms.shutdown];
 
-        _npac2.default.start(adapters, [testPdms], terminators, function (err, res) {
-            if (err) {
-                throw err;
-            } else {
-                process.kill(process.pid, 'SIGTERM');
-            }
-        });
+        (0, _npac.npacStart)(adapters, [testPdms], terminators);
     }).timeout(15000);
 });
-//import { expect } from 'chai'
