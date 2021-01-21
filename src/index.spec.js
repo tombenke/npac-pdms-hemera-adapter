@@ -5,15 +5,14 @@ import * as pdms from './index'
 import * as _ from 'lodash'
 
 describe('pdms', () => {
-    let sandbox
+    let sandbox = sinon
 
-    beforeEach(done => {
+    beforeEach((done) => {
         removeSignalHandlers()
-        sandbox = sinon.sandbox.create({ useFakeTimers: false })
         done()
     })
 
-    afterEach(done => {
+    afterEach((done) => {
         removeSignalHandlers()
         sandbox.restore()
         done()
@@ -23,7 +22,7 @@ describe('pdms', () => {
         /* Add command specific config parameters */
     })
 
-    it('#startup, #shutdown', done => {
+    it('#startup, #shutdown', (done) => {
         catchExitSignals(sandbox, done)
 
         const adapters = [mergeConfig(config), addLogger, pdms.startup]
@@ -45,7 +44,7 @@ describe('pdms', () => {
         })
     })
 
-    it('call pdms service', done => {
+    it('call pdms service', (done) => {
         catchExitSignals(sandbox, done)
 
         const getMonitoringIsAlive = (req, cb) => {
@@ -61,17 +60,17 @@ describe('pdms', () => {
 
         const monitoringAdapter = (container, next) => {
             // Add built-in monitoring service
-            container.pdms.add({ topic: '/monitoring/isAlive', method: 'get', uri: '/monitoring/isAlive' }, function(
-                data,
-                cb
-            ) {
-                container.logger.info(
-                    `Monitoring handler called with ${JSON.stringify(data.request, null, '')}, ${data.method}, ${
-                        data.uri
-                    }, ...`
-                )
-                getMonitoringIsAlive(data.request, cb)
-            })
+            container.pdms.add(
+                { topic: '/monitoring/isAlive', method: 'get', uri: '/monitoring/isAlive' },
+                function (data, cb) {
+                    container.logger.info(
+                        `Monitoring handler called with ${JSON.stringify(data.request, null, '')}, ${data.method}, ${
+                            data.uri
+                        }, ...`
+                    )
+                    getMonitoringIsAlive(data.request, cb)
+                }
+            )
             next(null, {})
         }
 
@@ -110,11 +109,11 @@ describe('pdms', () => {
         npacStart(adapters, [testPdms], terminators)
     })
 
-    it('call pdms service - increased timeout', done => {
+    it('call pdms service - increased timeout', (done) => {
         catchExitSignals(sandbox, done)
 
         const longRunningTask = (req, cb) => {
-            setTimeout(function() {
+            setTimeout(function () {
                 cb(null, {
                     headers: {
                         'Content-Type': 'application/json; charset=utf-8'
@@ -128,17 +127,17 @@ describe('pdms', () => {
 
         const longRunningTaskAdapter = (container, next) => {
             // Add built-in monitoring service
-            container.pdms.add({ topic: '/long/running/task', method: 'get', uri: '/long/running/task' }, function(
-                data,
-                cb
-            ) {
-                container.logger.info(
-                    `Monitoring handler called with ${JSON.stringify(data.request, null, '')}, ${data.method}, ${
-                        data.uri
-                    }, ...`
-                )
-                longRunningTask(data.request, cb)
-            })
+            container.pdms.add(
+                { topic: '/long/running/task', method: 'get', uri: '/long/running/task' },
+                function (data, cb) {
+                    container.logger.info(
+                        `Monitoring handler called with ${JSON.stringify(data.request, null, '')}, ${data.method}, ${
+                            data.uri
+                        }, ...`
+                    )
+                    longRunningTask(data.request, cb)
+                }
+            )
             next(null, {})
         }
 
