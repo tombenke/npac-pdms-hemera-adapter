@@ -9,7 +9,7 @@ import _ from 'lodash'
 
 //let hemera = null
 
-const mkHemeraLogger = container => {
+const mkHemeraLogger = (container) => {
     return new (class Logger {
         info(msg) {
             container.logger.info(`hemera: ${JSON.stringify(msg, null, '')}`)

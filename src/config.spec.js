@@ -1,15 +1,15 @@
 import { expect } from 'chai'
 import config from './config'
 
-before(done => {
+before((done) => {
     done()
 })
-after(done => {
+after((done) => {
     done()
 })
 
 describe('pmdsHemera.config', () => {
-    it('#defaults', done => {
+    it('#defaults', (done) => {
         const expected = {
             pdms: {
                 natsUri: 'nats://demo.nats.io:4222',
