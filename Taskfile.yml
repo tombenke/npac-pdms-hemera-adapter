@@ -3,6 +3,9 @@
 version: 3
 
 vars:
+  GIT_HOOKS_DIR:
+    sh: sh -c 'echo "$(pwd)/.git/hooks"'
+
 env:
 
 tasks:
@@ -29,9 +32,9 @@ tasks:
   coverage:
     desc: Test coverage
     cmds:
-      - task: nats-upd
+      - task: dc-upd
       - npm run coverage
-      - task: nats-down
+      - task: dc-down
 
   lint:
     desc: Run linter
