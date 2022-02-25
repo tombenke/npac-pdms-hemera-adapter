@@ -1,10 +1,9 @@
 npac-pdms-hemera-adapter
 ========================
 
+[![Quality Check Actions Status](https://github.com/tombenke/npac-pdms-hemera-adapter/workflows/Quality%20Check/badge.svg)](https://github.com/tombenke/npac-pdms-hemera-adapter)
 [![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
 [![npm version][npm-badge]][npm-url]
-[![Build Status][travis-badge]][travis-url]
-[![Coveralls][BadgeCoveralls]][Coveralls]
 
 ## About
 

@@ -77,7 +77,7 @@ describe('pdms', () => {
         const adapters = [
             mergeConfig(
                 _.merge({}, config, {
-                    pdms: { natsUri: 'nats://demo.nats.io:4222' }
+                    pdms: { natsUri: 'nats://localhost:4222' }
                 })
             ),
             addLogger,

@@ -12,7 +12,7 @@ describe('pmdsHemera.config', () => {
     it('#defaults', (done) => {
         const expected = {
             pdms: {
-                natsUri: 'nats://demo.nats.io:4222',
+                natsUri: 'nats://localhost:4222',
                 timeout: 2000
             }
         }
