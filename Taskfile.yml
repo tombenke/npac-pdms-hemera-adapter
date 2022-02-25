@@ -66,6 +66,11 @@ tasks:
       - npm audit fix --force || echo "Install complete"
       - task: install-git-hooks
 
+  docs:
+    desc: Generate the documentation
+    cmds:
+      - npm run docs
+
   clean:
     desc: Clean temporary files and folders
     cmds:

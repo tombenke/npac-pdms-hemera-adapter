@@ -3,7 +3,7 @@
 'use strict'
 
 import Hemera from 'nats-hemera'
-import nats from 'nats'
+import { connect } from 'nats'
 import defaults from './config'
 import _ from 'lodash'
 
@@ -49,7 +49,7 @@ const startup = (container, next) => {
     const pdmsConfig = _.merge({}, defaults, { pdms: container.config.pdms || {} })
     container.logger.info(`Start up pdmsHemera`)
 
-    const natsConnection = nats.connect({ url: pdmsConfig.pdms.natsUri })
+    const natsConnection = connect({ url: pdmsConfig.pdms.natsUri })
     const hemera = new Hemera(natsConnection, {
         logLevel: container.logger.level,
         logger: mkHemeraLogger(container),
