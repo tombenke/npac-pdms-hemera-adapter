@@ -11,23 +11,23 @@ import _ from 'lodash'
 
 const mkHemeraLogger = (container) => {
     return new (class Logger {
-        info(msg) {
+        info(...msg) {
             container.logger.info(`hemera: ${JSON.stringify(msg, null, '')}`)
         }
         warn(msg) {
-            container.logger.warn(JSON.stringify(msg, null, ''))
+            container.logger.warn(`hemera: ${JSON.stringify(msg, null, '')}`)
         }
         debug(msg) {
-            //container.logger.debug(JSON.stringify(msg, null, ''))
+            //container.logger.debug(`hemera: ${JSON.stringify(msg, null, '')}`)
         }
         trace(msg) {
-            container.logger.verbose(JSON.stringify(msg, null, ''))
+            container.logger.verbose(`hemera: ${JSON.stringify(msg, null, '')}`)
         }
         error(msg) {
-            container.logger.error(JSON.stringify(msg, null, ''))
+            container.logger.error(`hemera: ${JSON.stringify(msg, null, '')}`)
         }
         fatal(msg) {
-            container.logger.error(JSON.stringify(msg, null, ''))
+            container.logger.error(`hemera: ${JSON.stringify(msg, null, '')}`)
         }
     })()
 }

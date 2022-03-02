@@ -11,8 +11,6 @@ var _natsHemera2 = _interopRequireDefault(_natsHemera);
 
 var _nats = require('nats');
 
-var _nats2 = _interopRequireDefault(_nats);
-
 var _config = require('./config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -35,33 +33,37 @@ var mkHemeraLogger = function mkHemeraLogger(container) {
 
         _createClass(Logger, [{
             key: 'info',
-            value: function info(msg) {
+            value: function info() {
+                for (var _len = arguments.length, msg = Array(_len), _key = 0; _key < _len; _key++) {
+                    msg[_key] = arguments[_key];
+                }
+
                 container.logger.info('hemera: ' + JSON.stringify(msg, null, ''));
             }
         }, {
             key: 'warn',
             value: function warn(msg) {
-                container.logger.warn(JSON.stringify(msg, null, ''));
+                container.logger.warn('hemera: ' + JSON.stringify(msg, null, ''));
             }
         }, {
             key: 'debug',
             value: function debug(msg) {
-                //container.logger.debug(JSON.stringify(msg, null, ''))
+                //container.logger.debug(`hemera: ${JSON.stringify(msg, null, '')}`)
             }
         }, {
             key: 'trace',
             value: function trace(msg) {
-                container.logger.verbose(JSON.stringify(msg, null, ''));
+                container.logger.verbose('hemera: ' + JSON.stringify(msg, null, ''));
             }
         }, {
             key: 'error',
             value: function error(msg) {
-                container.logger.error(JSON.stringify(msg, null, ''));
+                container.logger.error('hemera: ' + JSON.stringify(msg, null, ''));
             }
         }, {
             key: 'fatal',
             value: function fatal(msg) {
-                container.logger.error(JSON.stringify(msg, null, ''));
+                container.logger.error('hemera: ' + JSON.stringify(msg, null, ''));
             }
         }]);
 
@@ -86,7 +88,7 @@ var startup = function startup(container, next) {
     var pdmsConfig = _lodash2.default.merge({}, _config2.default, { pdms: container.config.pdms || {} });
     container.logger.info('Start up pdmsHemera');
 
-    var natsConnection = _nats2.default.connect({ url: pdmsConfig.pdms.natsUri });
+    var natsConnection = (0, _nats.connect)({ url: pdmsConfig.pdms.natsUri });
     var hemera = new _natsHemera2.default(natsConnection, {
         logLevel: container.logger.level,
         logger: mkHemeraLogger(container),

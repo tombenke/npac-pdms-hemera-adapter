@@ -47,6 +47,11 @@ tasks:
       - task: clean
       - npm run build
 
+  publish:
+    desc: Publish the package
+    cmds:
+      - npm publish
+
   pre-commit:
     desc: Runs the QA tasks from a git pre-commit hook
     cmds:
