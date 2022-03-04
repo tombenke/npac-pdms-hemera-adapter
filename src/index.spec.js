@@ -22,7 +22,7 @@ describe('pdms', () => {
     const config = _.merge({}, defaults, {
         /* Add command specific config parameters */
     })
-
+    /*
     it('#startup, #shutdown', (done) => {
         catchExitSignals(sandbox, done)
 
@@ -189,6 +189,41 @@ describe('pdms', () => {
                 next(null, null)
             })
             container.pdms.publish(topic, JSON.stringify(payload))
+        }
+
+        const terminators = [pdms.shutdown]
+
+        npacStart(adapters, [testPdms], terminators, (err, res) => {
+            if (err) {
+                throw err
+            } else {
+                process.kill(process.pid, 'SIGTERM')
+            }
+        })
+    })
+*/
+    it('#request, #response', (done) => {
+        catchExitSignals(sandbox, done)
+
+        const adapters = [mergeConfig(config), addLogger, pdms.startup]
+
+        const payload = { note: 'text...', number: 42, floatValue: 42.24 }
+        const topic = 'test-topic'
+
+        const testPdms = (container, next) => {
+            container.logger.info(`test: Run job to test pdms`)
+            container.pdms.response(topic, (requestPayload) => {
+                container.logger.info(`test: received request: ${requestPayload}`)
+                return requestPayload
+            })
+
+            container.logger.info(`test: send request(${topic}, ${JSON.stringify(payload)})`)
+            container.pdms.request(topic, JSON.stringify(payload), (response) => {
+                const receivedPayload = JSON.parse(response)
+                container.logger.info(`test: received response: ${response}`)
+                expect(payload).to.eql(receivedPayload)
+                next(null, null)
+            })
         }
 
         const terminators = [pdms.shutdown]

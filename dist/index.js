@@ -109,7 +109,19 @@ var startup = function startup(container, next) {
                 add: hemera.add.bind(hemera),
                 act: hemera.act.bind(hemera),
                 publish: natsConnection.publish.bind(natsConnection),
-                subscribe: natsConnection.subscribe.bind(natsConnection)
+                subscribe: natsConnection.subscribe.bind(natsConnection),
+                request: function request(topic, payload, responseCallback) {
+                    container.logger.info('pdms: request(' + topic + ', ' + payload + ')');
+                    natsConnection.request(topic, payload, {}, responseCallback);
+                },
+                response: function response(topic, makeResponse) {
+                    return natsConnection.subscribe(topic, function (requestPayload, replyTo) {
+                        container.logger.debug('pdms: response(' + topic + ', ' + requestPayload + ')');
+                        var responsePayload = makeResponse(requestPayload);
+                        container.logger.debug('pdms: makeResponse() => ' + responsePayload);
+                        natsConnection.publish(replyTo, responsePayload);
+                    });
+                }
             }
         });
     });
