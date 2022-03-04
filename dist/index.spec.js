@@ -1,5 +1,7 @@
 'use strict';
 
+var _chai = require('chai');
+
 var _sinon = require('sinon');
 
 var _sinon2 = _interopRequireDefault(_sinon);
@@ -47,7 +49,6 @@ describe('pdms', function () {
 
         var testPdms = function testPdms(container, next) {
             container.logger.info('Run job to test pdms');
-            // TODO: Implement endpoint testing
             next(null, null);
         };
 
@@ -157,4 +158,34 @@ describe('pdms', function () {
 
         (0, _npac.npacStart)(adapters, [testPdms], terminators);
     }).timeout(15000);
+
+    it('#publish, #subscribe', function (done) {
+        (0, _npac.catchExitSignals)(sandbox, done);
+
+        var adapters = [(0, _npac.mergeConfig)(config), _npac.addLogger, pdms.startup];
+
+        var payload = { note: 'text...', number: 42, floatValue: 42.24 };
+        var topic = 'test-topic';
+
+        var testPdms = function testPdms(container, next) {
+            container.logger.info('Run job to test pdms');
+            container.pdms.subscribe(topic, function (msg) {
+                var receivedPayload = JSON.parse(msg);
+                container.logger.info('test: received msg: ' + msg);
+                (0, _chai.expect)(payload).to.eql(receivedPayload);
+                next(null, null);
+            });
+            container.pdms.publish(topic, JSON.stringify(payload));
+        };
+
+        var terminators = [pdms.shutdown];
+
+        (0, _npac.npacStart)(adapters, [testPdms], terminators, function (err, res) {
+            if (err) {
+                throw err;
+            } else {
+                process.kill(process.pid, 'SIGTERM');
+            }
+        });
+    });
 });

@@ -1,3 +1,4 @@
+import { expect } from 'chai'
 import sinon from 'sinon'
 import { addLogger, mergeConfig, removeSignalHandlers, catchExitSignals, npacStart } from 'npac'
 import defaults from './config'
@@ -29,7 +30,6 @@ describe('pdms', () => {
 
         const testPdms = (container, next) => {
             container.logger.info(`Run job to test pdms`)
-            // TODO: Implement endpoint testing
             next(null, null)
         }
 
@@ -171,4 +171,34 @@ describe('pdms', () => {
 
         npacStart(adapters, [testPdms], terminators)
     }).timeout(15000)
+
+    it('#publish, #subscribe', (done) => {
+        catchExitSignals(sandbox, done)
+
+        const adapters = [mergeConfig(config), addLogger, pdms.startup]
+
+        const payload = { note: 'text...', number: 42, floatValue: 42.24 }
+        const topic = 'test-topic'
+
+        const testPdms = (container, next) => {
+            container.logger.info(`Run job to test pdms`)
+            container.pdms.subscribe(topic, (msg) => {
+                const receivedPayload = JSON.parse(msg)
+                container.logger.info(`test: received msg: ${msg}`)
+                expect(payload).to.eql(receivedPayload)
+                next(null, null)
+            })
+            container.pdms.publish(topic, JSON.stringify(payload))
+        }
+
+        const terminators = [pdms.shutdown]
+
+        npacStart(adapters, [testPdms], terminators, (err, res) => {
+            if (err) {
+                throw err
+            } else {
+                process.kill(process.pid, 'SIGTERM')
+            }
+        })
+    })
 })

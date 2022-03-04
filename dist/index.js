@@ -107,7 +107,9 @@ var startup = function startup(container, next) {
             pdms: {
                 hemera: hemera,
                 add: hemera.add.bind(hemera),
-                act: hemera.act.bind(hemera)
+                act: hemera.act.bind(hemera),
+                publish: natsConnection.publish.bind(natsConnection),
+                subscribe: natsConnection.subscribe.bind(natsConnection)
             }
         });
     });
