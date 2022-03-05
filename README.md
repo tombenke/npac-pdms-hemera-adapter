@@ -7,7 +7,23 @@ npac-pdms-hemera-adapter
 
 ## About
 
-npac adapter with pdms api, using Hemera.js
+This is an npac adapter with pdms api, using Hemera.js. This adapter also provides direct nats-level functions.
+
+The adapter can be accessed via the `pdms` name, and provides the following properties:
+
+```JavaScript
+    pdms: {
+         hemera: // The hemera instance
+         add: // The hemera.add() function
+         act: // THe hemera.act() function
+         publish: // The nats.publish() function
+         subscribe: // The nats.subscribe() function
+         request: // A NATS-level RPC-like request function
+         response: // A NATS-level RPC-like response function
+    }
+```
+
+See the [unit tests](src/index.spec.js) as an example for the usage of these functions.
 
 ## Installation
 

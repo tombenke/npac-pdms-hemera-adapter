@@ -86,7 +86,7 @@ var mkHemeraLogger = function mkHemeraLogger(container) {
 var startup = function startup(container, next) {
     // Merges the defaults with the config coming from the outer world
     var pdmsConfig = _lodash2.default.merge({}, _config2.default, { pdms: container.config.pdms || {} });
-    container.logger.info('Start up pdmsHemera');
+    container.logger.info('pdms: Start up');
 
     var natsConnection = (0, _nats.connect)({ url: pdmsConfig.pdms.natsUri });
     var hemera = new _natsHemera2.default(natsConnection, {
@@ -99,7 +99,7 @@ var startup = function startup(container, next) {
     });
 
     hemera.ready(function () {
-        container.logger.info('Hemera is connected');
+        container.logger.info('pdms: Connected to NATS');
 
         // Call next setup function with the context extension
         next(null, {
@@ -111,7 +111,7 @@ var startup = function startup(container, next) {
                 publish: natsConnection.publish.bind(natsConnection),
                 subscribe: natsConnection.subscribe.bind(natsConnection),
                 request: function request(topic, payload, responseCallback) {
-                    container.logger.info('pdms: request(' + topic + ', ' + payload + ')');
+                    container.logger.debug('pdms: request(' + topic + ', ' + payload + ')');
                     natsConnection.request(topic, payload, {}, responseCallback);
                 },
                 response: function response(topic, makeResponse) {
@@ -141,7 +141,7 @@ var startup = function startup(container, next) {
  */
 var shutdown = function shutdown(container, next) {
     container.pdms.hemera.close();
-    container.logger.info('Shut down pdmsHemera');
+    container.logger.info('pdms: Shutting down');
     next(null, null);
 };
 

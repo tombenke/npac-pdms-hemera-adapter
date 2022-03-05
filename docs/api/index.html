@@ -48,7 +48,19 @@
 <a href="http://github.com/badges/stability-badges"><img src="http://badges.github.io/stability-badges/dist/stable.svg" alt="stable"></a><br>
 <a href="https://badge.fury.io/js/npac-pdms-hemera-adapter"><img src="https://badge.fury.io/js/npac-pdms-hemera-adapter.svg" alt="npm version"></a></p>
 <h2>About</h2>
-<p>npac adapter with pdms api, using Hemera.js</p>
+<p>This is an npac adapter with pdms api, using Hemera.js. This adapter also provides direct nats-level functions.</p>
+<p>The adapter can be accessed via the <code>pdms</code> name, and provides the following properties:</p>
+<pre class="prettyprint source lang-JavaScript"><code>    pdms: {
+         hemera: // The hemera instance
+         add: // The hemera.add() function
+         act: // THe hemera.act() function
+         publish: // The nats.publish() function
+         subscribe: // The nats.subscribe() function
+         request: // A NATS-level RPC-like request function
+         response: // A NATS-level RPC-like response function
+    }
+</code></pre>
+<p>See the <a href="src/index.spec.js">unit tests</a> as an example for the usage of these functions.</p>
 <h2>Installation</h2>
 <p>Run the install command:</p>
 <pre><code>npm install --save npac-pdms-hemera-adapter
