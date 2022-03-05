@@ -22,7 +22,7 @@ describe('pdms', () => {
     const config = _.merge({}, defaults, {
         /* Add command specific config parameters */
     })
-    /*
+
     it('#startup, #shutdown', (done) => {
         catchExitSignals(sandbox, done)
 
@@ -201,7 +201,7 @@ describe('pdms', () => {
             }
         })
     })
-*/
+
     it('#request, #response', (done) => {
         catchExitSignals(sandbox, done)
 
