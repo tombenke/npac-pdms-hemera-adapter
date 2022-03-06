@@ -69,6 +69,7 @@ const startup = (container, next) => {
                 hemera: hemera,
                 add: hemera.add.bind(hemera),
                 act: hemera.act.bind(hemera),
+                flush: natsConnection.flush.bind(natsConnection),
                 publish: natsConnection.publish.bind(natsConnection),
                 subscribe: natsConnection.subscribe.bind(natsConnection),
                 request: (topic, payload, responseCallback) => {
@@ -100,6 +101,7 @@ const startup = (container, next) => {
  * @function
  */
 const shutdown = (container, next) => {
+    container.pdms.flush()
     container.pdms.hemera.close()
     container.logger.info('pdms: Shutting down')
     next(null, null)
