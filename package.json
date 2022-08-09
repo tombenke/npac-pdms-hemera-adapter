@@ -24,8 +24,8 @@
   "main": "./dist/index.js",
   "dependencies": {
     "lodash": "^4.17.21",
-    "nats": "1.4.12",
-    "nats-hemera": "^7.0.2",
+    "nats": "1.2.x",
+    "nats-hemera": "7.0.2",
     "npac": "^2.1.11"
   },
   "devDependencies": {
@@ -42,12 +42,6 @@
     "chai": "^4.3.6",
     "cross-env": "^7.0.3",
     "eslint": "^8.9.0",
-    "gulp": "^3.2.0",
-    "gulp-debug": "^3.2.0",
-    "gulp-markdown": "^6.0.0",
-    "gulp-mustache": "^5.0.0",
-    "gulp-rename": "^2.0.0",
-    "gulp-through": "^0.4.0",
     "istanbul": "^1.1.0-alpha.1",
     "jsdoc": "^3.6.10",
     "lint-staged": "^12.3.4",
