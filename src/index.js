@@ -3,6 +3,7 @@
 'use strict'
 
 import Hemera from 'nats-hemera'
+import { connect as stanConnect } from 'node-nats-streaming'
 import { connect } from 'nats'
 import defaults from './config'
 import _ from 'lodash'
@@ -63,27 +64,91 @@ const startup = (container, next) => {
         container.logger.info('pdms: Connected to NATS')
 
         // Call next setup function with the context extension
-        next(null, {
-            config: pdmsConfig,
-            pdms: {
-                hemera: hemera,
-                add: hemera.add.bind(hemera),
-                act: hemera.act.bind(hemera),
-                flush: natsConnection.flush.bind(natsConnection),
-                publish: natsConnection.publish.bind(natsConnection),
-                subscribe: natsConnection.subscribe.bind(natsConnection),
-                request: (topic, payload, responseCallback) => {
-                    container.logger.debug(`pdms: request(${topic}, ${payload})`)
-                    natsConnection.request(topic, payload, {}, responseCallback)
-                },
-                response: (topic, makeResponse) =>
-                    natsConnection.subscribe(topic, (requestPayload, replyTo) => {
-                        container.logger.debug(`pdms: response(${topic}, ${requestPayload})`)
-                        const responsePayload = makeResponse(requestPayload)
-                        container.logger.debug(`pdms: makeResponse() => ${responsePayload}`)
-                        natsConnection.publish(replyTo, responsePayload)
-                    })
-            }
+        const stanConnection = stanConnect(pdmsConfig.pdms.clusterId, pdmsConfig.pdms.clientId, {
+            url: pdmsConfig.pdms.natsUri
+        })
+        stanConnection.on('connect', () => {
+            container.logger.info('stan: Connected to STAN')
+
+            next(null, {
+                config: pdmsConfig,
+                pdms: {
+                    stan: stanConnection,
+                    hemera: hemera,
+
+                    // Hemera functions
+                    add: hemera.add.bind(hemera),
+                    act: hemera.act.bind(hemera),
+
+                    // NATS functions
+                    //flush: natsConnection.flush.bind(natsConnection),
+                    //publish: natsConnection.publish.bind(natsConnection),
+                    //subscribe: natsConnection.subscribe.bind(natsConnection),
+                    flush: (callback) => {
+                        container.logger.debug(`nats: flush(${callback})`)
+                        natsConnection.flush(callback)
+                    },
+                    publish: (subject, data, options, timeout, callback) => {
+                        container.logger.debug(
+                            `nats: publish(${subject}, ${data}, ${options}, ${timeout}, ${callback})`
+                        )
+                        natsConnection.publish(subject, data, options, timeout, callback)
+                    },
+                    subscribe: (subject, options, callback) => {
+                        container.logger.debug(`nats: subscribe(${subject}, ${options}, ${callback})`)
+                        natsConnection.subscribe(subject, options, callback)
+                    },
+                    request: (topic, payload, responseCallback) => {
+                        container.logger.debug(`nats: request(${topic}, ${payload})`)
+                        natsConnection.request(topic, payload, {}, responseCallback)
+                    },
+                    response: (topic, makeResponse) =>
+                        natsConnection.subscribe(topic, (requestPayload, replyTo) => {
+                            container.logger.debug(`nats: response(${topic}, ${requestPayload})`)
+                            const responsePayload = makeResponse(requestPayload)
+                            container.logger.debug(`nats: makeResponse() => ${responsePayload}`)
+                            natsConnection.publish(replyTo, responsePayload)
+                        }),
+
+                    // STAN functions
+                    publishAsyncDurable: stanConnection.publish.bind(stanConnection),
+                    subscribeDurable: (topic, cb, opts) => {
+                        container.logger.debug(`stan: subscribeDurable to ${topic}`)
+                        opts = _.isUndefined(opts)
+                            ? stanConnection.subscriptionOptions().setStartWithLastReceived()
+                            : opts
+                        opts.setManualAckMode(false)
+                        let subs = stanConnection.subscribe(topic, opts)
+                        subs.on('unsubscribed', () => {
+                            container.logger.debug(`stan: unsubscribed from ${topic}`)
+                        })
+                        subs.on('message', (msg) => {
+                            container.logger.debug(
+                                'stan: Received a message [' + msg.getSequence() + '] ' + msg.getData()
+                            )
+                            cb(msg)
+                        })
+                    },
+                    subscribeDurableWithAck: (topic, cb, opts) => {
+                        container.logger.debug(`stan: subscribeDurable to ${topic}`)
+                        opts = _.isUndefined(opts)
+                            ? stanConnection.subscriptionOptions().setStartWithLastReceived()
+                            : opts
+                        opts.setManualAckMode(true)
+                        opts.setAckWait(60 * 1000)
+                        let subs = stanConnection.subscribe(topic, opts)
+                        subs.on('unsubscribed', () => {
+                            container.logger.debug(`stan: unsubscribed from ${topic}`)
+                        })
+                        subs.on('message', (msg) => {
+                            container.logger.debug(
+                                'stan: Received a message [' + msg.getSequence() + '] ' + msg.getData()
+                            )
+                            cb(msg)
+                        })
+                    }
+                }
+            })
         })
     })
 }
@@ -101,10 +166,14 @@ const startup = (container, next) => {
  * @function
  */
 const shutdown = (container, next) => {
+    container.logger.info('pdms: Shutting down')
     container.pdms.flush()
     container.pdms.hemera.close()
-    container.logger.info('pdms: Shutting down')
-    next(null, null)
+    container.pdms.stan.close()
+    container.pdms.stan.on('close', () => {
+        container.logger.debug('stan: onClose')
+        next(null, null)
+    })
 }
 
 module.exports = {

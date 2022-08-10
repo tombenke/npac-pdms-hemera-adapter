@@ -19,14 +19,22 @@ describe('pdms', () => {
         done()
     })
 
-    const config = _.merge({}, defaults, {
-        /* Add command specific config parameters */
-    })
+    const config = (clientId) =>
+        _.merge({}, defaults, {
+            logger: {
+                level: 'debug'
+            },
+            pdms: {
+                clusterId: 'npac-cluster',
+                clientId: clientId
+            }
+            /* Add command specific config parameters */
+        })
 
     it('#startup, #shutdown', (done) => {
         catchExitSignals(sandbox, done)
 
-        const adapters = [mergeConfig(config), addLogger, pdms.startup]
+        const adapters = [mergeConfig(config('test-client-ss')), addLogger, pdms.startup]
 
         const testPdms = (container, next) => {
             container.logger.info(`Run job to test pdms`)
@@ -76,7 +84,7 @@ describe('pdms', () => {
 
         const adapters = [
             mergeConfig(
-                _.merge({}, config, {
+                _.merge({}, config('test-client-call-pdms-service'), {
                     pdms: { natsUri: 'nats://localhost:4222' }
                 })
             ),
@@ -142,7 +150,7 @@ describe('pdms', () => {
         }
 
         const adapters = [
-            mergeConfig(_.merge({}, config, { pdms: { timeout: 4000 } })),
+            mergeConfig(_.merge({}, config('test-client-call-pdms-service-inc-tout'), { pdms: { timeout: 4000 } })),
             addLogger,
             pdms.startup,
             longRunningTaskAdapter
@@ -175,7 +183,7 @@ describe('pdms', () => {
     it('#publish, #subscribe', (done) => {
         catchExitSignals(sandbox, done)
 
-        const adapters = [mergeConfig(config), addLogger, pdms.startup]
+        const adapters = [mergeConfig(config('test-client-pub-sub')), addLogger, pdms.startup]
 
         const payload = { note: 'text...', number: 42, floatValue: 42.24 }
         const topic = 'test-topic'
@@ -205,7 +213,7 @@ describe('pdms', () => {
     it('#request, #response', (done) => {
         catchExitSignals(sandbox, done)
 
-        const adapters = [mergeConfig(config), addLogger, pdms.startup]
+        const adapters = [mergeConfig(config('test-client-req-res')), addLogger, pdms.startup]
 
         const payload = { note: 'text...', number: 42, floatValue: 42.24 }
         const topic = 'test-topic'
@@ -223,6 +231,84 @@ describe('pdms', () => {
                 container.logger.info(`test: received response: ${response}`)
                 expect(payload).to.eql(receivedPayload)
                 next(null, null)
+            })
+        }
+
+        const terminators = [pdms.shutdown]
+
+        npacStart(adapters, [testPdms], terminators, (err, res) => {
+            if (err) {
+                throw err
+            } else {
+                process.kill(process.pid, 'SIGTERM')
+            }
+        })
+    })
+
+    // STAN functions
+    it('#publishDurable, #subscribeDurable', (done) => {
+        catchExitSignals(sandbox, done)
+
+        const adapters = [mergeConfig(config('test-client-pub-sub-durable')), addLogger, pdms.startup]
+
+        const payload = { note: 'text...', number: 42, floatValue: 42.24 }
+        const topic = 'test-topic-durable'
+
+        const testPdms = (container, next) => {
+            container.logger.info(`Run job to test pdms`)
+            container.pdms.subscribeDurable(topic, (msg) => {
+                const data = msg.getData()
+                const receivedPayload = JSON.parse(data)
+                container.logger.info(`test: received msg: ${data}`)
+                expect(payload).to.eql(receivedPayload)
+
+                next(null, null)
+            })
+            container.pdms.publishAsyncDurable(topic, JSON.stringify(payload), (err, guid) => {
+                if (err) {
+                    container.logger.error('publish failed: ' + err)
+                } else {
+                    container.logger.debug('published message with guid: ' + guid)
+                }
+            })
+        }
+
+        const terminators = [pdms.shutdown]
+
+        npacStart(adapters, [testPdms], terminators, (err, res) => {
+            if (err) {
+                throw err
+            } else {
+                process.kill(process.pid, 'SIGTERM')
+            }
+        })
+    })
+
+    it('#publishDurable, #subscribeDurableWithAck', (done) => {
+        catchExitSignals(sandbox, done)
+
+        const adapters = [mergeConfig(config('test-client-pub-sub-durable')), addLogger, pdms.startup]
+
+        const payload = { note: 'text...', number: 42, floatValue: 42.24 }
+        const topic = 'test-topic-durable-with-ack'
+
+        const testPdms = (container, next) => {
+            container.logger.info(`Run job to test pdms`)
+            container.pdms.subscribeDurableWithAck(topic, (msg) => {
+                const data = msg.getData()
+                const receivedPayload = JSON.parse(data)
+                container.logger.info(`test: received msg: ${data}`)
+                expect(payload).to.eql(receivedPayload)
+                msg.ack()
+
+                next(null, null)
+            })
+            container.pdms.publishAsyncDurable(topic, JSON.stringify(payload), (err, guid) => {
+                if (err) {
+                    container.logger.error('publish failed: ' + err)
+                } else {
+                    container.logger.debug('published message with guid: ' + guid)
+                }
             })
         }
 

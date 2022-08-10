@@ -13,7 +13,9 @@ describe('pmdsHemera.config', () => {
         const expected = {
             pdms: {
                 natsUri: 'nats://localhost:4222',
-                timeout: 2000
+                timeout: 2000,
+                clusterId: '',
+                clientId: ''
             }
         }
 

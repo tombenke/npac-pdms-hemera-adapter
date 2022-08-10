@@ -4,6 +4,8 @@
 module.exports = {
     pdms: {
         natsUri: process.env.PDMS_NATS_URI || 'nats://localhost:4222',
-        timeout: process.env.PDMS_TIMEOUT || 2000
+        timeout: process.env.PDMS_TIMEOUT || 2000,
+        clusterId: process.env.PDMS_CLUSTER_ID || '',
+        clientId: process.env.PDMS_CLIENT_ID || ''
     }
 }
